@@ -1,0 +1,119 @@
+{% extends "core/base.html" %}
+{% block title %}Post by {{ post.author.username }}{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display:flex;align-items:center;gap:12px">
+  <a href="javascript:history.back()" style="color:var(--ink-4);display:flex">
+    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+  </a>
+  <h2>Post</h2>
+</div>
+
+<article class="post-card" style="border-bottom:none">
+  <div class="post-meta">
+    <a href="{% url 'profile' post.author.username %}">
+      <img src="{{ post.author.get_avatar }}" alt="{{ post.author.username }}" class="avatar">
+    </a>
+    <div>
+      <a href="{% url 'profile' post.author.username %}" class="post-author-name">{{ post.author.get_full_name|default:post.author.username }}</a>
+      <div style="font-size:.72rem;color:var(--ink-4)">@{{ post.author.username }} · {{ post.created_at|date:"M d, Y" }}</div>
+    </div>
+    <span class="category-pill">{{ post.get_category_display }}</span>
+  </div>
+
+  <div class="post-content" style="font-size:1rem">{{ post.content }}</div>
+
+  {% if post.get_image %}
+  <img src="{{ post.get_image }}" alt="" class="post-image">
+  {% endif %}
+
+  {% if post.get_tags_list %}
+  <div class="post-tags">
+    {% for tag in post.get_tags_list %}
+    <a href="{% url 'explore' %}?q={{ tag }}" class="tag">#{{ tag }}</a>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="post-actions">
+    <button class="action-btn like-btn {% if user in post.likes.all %}liked{% endif %}" data-pk="{{ post.pk }}">
+      <svg width="16" height="16" fill="{% if user in post.likes.all %}currentColor{% else %}none{% endif %}" stroke="currentColor" viewBox="0 0 24 24" class="like-icon"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+      <span class="like-count">{{ post.like_count }}</span>
+    </button>
+    <button class="action-btn bookmark-btn {% if user in post.bookmarks.all %}bookmarked{% endif %}" data-pk="{{ post.pk }}">
+      <svg fill="{% if user in post.bookmarks.all %}currentColor{% else %}none{% endif %}" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+      Save
+    </button>
+  </div>
+</article>
+
+<!-- Comments -->
+<div style="border-top:2px solid var(--border)">
+  <div style="padding:16px 28px;border-bottom:1px solid var(--border)">
+    <h3 style="font-size:.85rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--ink-3)">
+      {{ post.comment_count }} Comments
+    </h3>
+  </div>
+
+  <!-- Add comment -->
+  <div style="padding:16px 28px;border-bottom:1px solid var(--border);display:flex;gap:10px" id="comment-form-area">
+    <img src="{{ user.get_avatar }}" alt="{{ user.username }}" class="avatar-sm" style="margin-top:2px">
+    <div style="flex:1">
+      <textarea id="comment-input" rows="2" placeholder="Add a comment..." style="width:100%;border:1.5px solid var(--border);border-radius:4px;padding:8px 10px;font-size:.85rem;resize:none;outline:none;background:var(--paper-2)" onfocus="this.style.borderColor='var(--ink)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+      <button id="submit-comment" class="btn btn-primary" style="margin-top:8px;font-size:.78rem;padding:6px 14px" data-pk="{{ post.pk }}">Post Comment</button>
+    </div>
+  </div>
+
+  <div id="comments-list">
+    {% for comment in comments %}
+    <div class="comment" style="padding:12px 28px">
+      <a href="{% url 'profile' comment.author.username %}">
+        <img src="{{ comment.author.get_avatar }}" alt="{{ comment.author.username }}" class="avatar-sm">
+      </a>
+      <div class="comment-body">
+        <a href="{% url 'profile' comment.author.username %}" class="comment-author">{{ comment.author.username }}</a>
+        <span class="comment-time" style="margin-left:8px">{{ comment.created_at|timesince }} ago</span>
+        <p class="comment-text">{{ comment.content }}</p>
+      </div>
+    </div>
+    {% empty %}
+    <div id="no-comments" style="padding:28px;text-align:center;color:var(--ink-4);font-size:.85rem">No comments yet. Be the first!</div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('submit-comment').addEventListener('click', async function() {
+  const input = document.getElementById('comment-input');
+  const content = input.value.trim();
+  if (!content) return;
+  const pk = this.dataset.pk;
+
+  const formData = new FormData();
+  formData.append('content', content);
+  formData.append('csrfmiddlewaretoken', CSRF);
+
+  const res = await fetch(`/api/comment/${pk}/`, {method:'POST', body:formData});
+  const data = await res.json();
+
+  if (data.id) {
+    document.getElementById('no-comments')?.remove();
+    const list = document.getElementById('comments-list');
+    const div = document.createElement('div');
+    div.className = 'comment';
+    div.style.cssText = 'padding:12px 28px;border-top:1px solid var(--border)';
+    div.innerHTML = `
+      <a href="/profile/${data.author}/"><img src="${data.avatar}" alt="${data.author}" class="avatar-sm" style="width:30px;height:30px;border-radius:50%;object-fit:cover"></a>
+      <div class="comment-body" style="flex:1;margin-left:10px">
+        <span class="comment-author" style="font-weight:600;font-size:.82rem">${data.author}</span>
+        <span class="comment-time" style="font-size:.7rem;color:var(--ink-4);margin-left:8px">just now</span>
+        <p class="comment-text" style="font-size:.85rem;margin-top:2px">${data.content}</p>
+      </div>`;
+    list.appendChild(div);
+    input.value = '';
+  }
+});
+</script>
+{% endblock %}

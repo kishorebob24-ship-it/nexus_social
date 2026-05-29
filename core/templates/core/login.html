@@ -1,0 +1,224 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Sign In{% endblock %}
+
+{% block auth_content %}
+<style>
+    .auth-page {
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .auth-left {
+        background: linear-gradient(145deg, #0a0a0f 0%, #111118 100%);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 60px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .auth-left::before {
+        content: '';
+        position: absolute;
+        width: 500px;
+        height: 500px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(124,109,216,0.12) 0%, transparent 70%);
+        top: -100px;
+        left: -100px;
+    }
+
+    .auth-left::after {
+        content: '';
+        position: absolute;
+        width: 400px;
+        height: 400px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(200,168,118,0.08) 0%, transparent 70%);
+        bottom: -80px;
+        right: -80px;
+    }
+
+    .auth-hero {
+        position: relative;
+        z-index: 1;
+        text-align: center;
+        max-width: 400px;
+    }
+
+    .auth-logo {
+        width: 64px;
+        height: 64px;
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Playfair Display', serif;
+        font-size: 30px;
+        font-weight: 700;
+        color: #fff;
+        margin: 0 auto 24px;
+    }
+
+    .auth-tagline {
+        font-family: 'Playfair Display', serif;
+        font-size: 36px;
+        font-weight: 700;
+        color: var(--text);
+        line-height: 1.2;
+        margin-bottom: 16px;
+    }
+
+    .auth-tagline em {
+        font-style: normal;
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .auth-desc {
+        font-size: 16px;
+        color: var(--text-2);
+        line-height: 1.6;
+        margin-bottom: 40px;
+    }
+
+    .auth-features {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        text-align: left;
+    }
+
+    .auth-feature {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 14px;
+        color: var(--text-2);
+    }
+
+    .auth-feature-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        flex-shrink: 0;
+    }
+
+    .auth-cover-img {
+        width: 100%;
+        border-radius: 16px;
+        margin: 28px 0;
+        max-height: 220px;
+        object-fit: cover;
+        border: 1px solid var(--border);
+    }
+
+    .auth-right {
+        background: var(--surface);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 60px;
+    }
+
+    .auth-form-container {
+        width: 100%;
+        max-width: 380px;
+    }
+
+    .auth-form-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 8px;
+    }
+
+    .auth-form-sub {
+        font-size: 14px;
+        color: var(--text-3);
+        margin-bottom: 32px;
+    }
+
+    .auth-form-sub a {
+        color: var(--accent);
+        text-decoration: none;
+    }
+
+    .error-box {
+        background: rgba(224,85,85,0.1);
+        border: 1px solid rgba(224,85,85,0.25);
+        color: var(--danger);
+        font-size: 13px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        margin-bottom: 16px;
+    }
+
+    @media (max-width: 800px) {
+        .auth-page { grid-template-columns: 1fr; }
+        .auth-left { display: none; }
+        .auth-right { padding: 40px 24px; }
+    }
+</style>
+
+<div class="auth-page">
+    <div class="auth-left">
+        <div class="auth-hero">
+            <div class="auth-logo">N</div>
+            <h1 class="auth-tagline">Where <em>ideas</em> find their audience</h1>
+            <p class="auth-desc">A professional network powered by AI recommendations that connect you to content that matters.</p>
+            <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=700&q=80"
+                 alt="Professional networking" class="auth-cover-img">
+            <div class="auth-features">
+                <div class="auth-feature">
+                    <div class="auth-feature-dot"></div>
+                    AI-powered content recommendations
+                </div>
+                <div class="auth-feature">
+                    <div class="auth-feature-dot"></div>
+                    Professional community across all industries
+                </div>
+                <div class="auth-feature">
+                    <div class="auth-feature-dot"></div>
+                    Smart assistant for content creation
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="auth-right">
+        <div class="auth-form-container">
+            <h2 class="auth-form-title">Welcome back</h2>
+            <p class="auth-form-sub">Don't have an account? <a href="/register/">Create one</a></p>
+
+            {% if error %}
+            <div class="error-box">{{ error }}</div>
+            {% endif %}
+
+            <form method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" name="username" placeholder="your_username" required autofocus>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" name="password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full" style="margin-top:8px">
+                    Sign In
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

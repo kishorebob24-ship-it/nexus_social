@@ -1,0 +1,76 @@
+{% extends 'core/base.html' %}
+{% block title %}Create Account{% endblock %}
+{% block content %}
+<div class="auth-page">
+    <div class="auth-visual">
+        <div class="auth-visual-bg"></div>
+        <div class="grid-bg"></div>
+        <div class="auth-visual-content">
+            <h1>Your voice.<br>Your network.<br>Amplified.</h1>
+            <p>Join a community where AI helps surface what matters most — from people who share your passions and perspectives.</p>
+            <div style="margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; max-width: 280px; margin-left: auto; margin-right: auto;">
+                <img src="https://picsum.photos/seed/grid1/130/90" style="border-radius: 10px; width: 100%; object-fit: cover;" alt="">
+                <img src="https://picsum.photos/seed/grid2/130/90" style="border-radius: 10px; width: 100%; object-fit: cover;" alt="">
+                <img src="https://picsum.photos/seed/grid3/130/90" style="border-radius: 10px; width: 100%; object-fit: cover;" alt="">
+                <img src="https://picsum.photos/seed/grid4/130/90" style="border-radius: 10px; width: 100%; object-fit: cover;" alt="">
+            </div>
+        </div>
+    </div>
+    <div class="auth-form-panel">
+        <div class="auth-form">
+            <div class="auth-logo">
+                <div class="logo-mark">N</div>
+                <span class="logo-text">Nexus</span>
+            </div>
+            <div>
+                <h2 class="auth-title">Create account</h2>
+                <p class="auth-subtitle">Start your journey on Nexus today</p>
+            </div>
+
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-error">{{ message }}</div>
+            {% endfor %}
+            {% endif %}
+
+            <form method="post" style="display: flex; flex-direction: column; gap: 14px;">
+                {% csrf_token %}
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="form-group">
+                        <label class="form-label">First Name</label>
+                        <input class="form-input" type="text" name="first_name" placeholder="Alex" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Last Name</label>
+                        <input class="form-input" type="text" name="last_name" placeholder="Morgan">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Username</label>
+                    <input class="form-input" type="text" name="username" placeholder="alex_morgan" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input class="form-input" type="email" name="email" placeholder="alex@example.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input class="form-input" type="password" name="password" placeholder="Min. 8 characters" required autocomplete="new-password">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Interests <span style="color: var(--text-muted); font-weight: 400; text-transform: none; letter-spacing: 0;">(helps AI recommendations)</span></label>
+                    <input class="form-input" type="text" name="interests" placeholder="photography, tech, travel, art...">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 14px; margin-top: 4px;">
+                    Create Account
+                </button>
+            </form>
+
+            <div class="auth-divider">or</div>
+            <p style="text-align: center; font-size: 14px; color: var(--text-dim);">
+                Already on Nexus? <a href="/login/" class="auth-link">Sign in</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

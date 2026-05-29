@@ -1,0 +1,107 @@
+{% extends 'core/base.html' %}
+{% block title %}AI For You{% endblock %}
+{% block content %}
+<div class="app-layout">
+    <nav class="sidebar">
+        <div class="logo">
+            <div class="logo-mark">N</div>
+            <span class="logo-text">Nexus</span>
+        </div>
+        <a href="/feed/" class="nav-item">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            Home Feed
+        </a>
+        <a href="/explore/" class="nav-item">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            Explore
+        </a>
+        <a href="/ai/" class="nav-item active">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            AI For You
+        </a>
+        <a href="/notifications/" class="nav-item">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            Notifications
+        </a>
+        <a href="/profile/{{ request.user.username }}/" class="sidebar-user">
+            <img src="{{ request.user.profile.get_avatar }}" class="avatar avatar-sm" alt="">
+            <div>
+                <div class="user-name">{{ request.user.get_full_name|default:request.user.username }}</div>
+                <div class="user-handle">@{{ request.user.username }}</div>
+            </div>
+        </a>
+    </nav>
+
+    <main class="main-content">
+        <div class="page-header">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div>
+                    <div class="page-title" style="display: flex; align-items: center; gap: 10px;">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6c63ff" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                        AI Curated For You
+                    </div>
+                    <div class="page-subtitle">Personalized by Claude AI based on your interests and activity</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Info Banner -->
+        <div style="margin: 20px 28px; padding: 16px 20px; background: linear-gradient(135deg, rgba(108,99,255,0.1), rgba(255,101,132,0.05)); border: 1px solid rgba(108,99,255,0.25); border-radius: var(--radius); display: flex; gap: 16px; align-items: flex-start;">
+            <div style="width: 40px; height: 40px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            </div>
+            <div>
+                <div style="font-weight: 700; font-size: 14px; margin-bottom: 4px;">How AI Recommendations Work</div>
+                <p style="font-size: 13px; color: var(--text-dim); line-height: 1.7;">Claude analyzes your stated interests (<strong style="color: var(--text);">{{ request.user.profile.interests|default:"none set yet" }}</strong>), your liked posts, and engagement patterns to surface content you haven't seen but will likely find valuable. Each recommendation includes a relevance score and explanation.</p>
+                {% if not request.user.profile.interests %}
+                <a href="/settings/profile/" class="btn btn-primary btn-sm" style="margin-top: 10px;">Add your interests</a>
+                {% endif %}
+            </div>
+        </div>
+
+        {% with user=request.user posts=recommended_posts %}{% include 'core/_posts.html' %}{% endwith %}
+    </main>
+
+    <aside class="right-panel">
+        <div class="panel-card ai-glow" style="background: linear-gradient(135deg, rgba(108,99,255,0.08), rgba(255,101,132,0.04)); border-color: rgba(108,99,255,0.2);">
+            <div class="panel-title" style="color: var(--accent);">Your AI Profile</div>
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
+                <img src="{{ request.user.profile.get_avatar }}" class="avatar avatar-sm" alt="">
+                <div>
+                    <div style="font-weight: 600; font-size: 13px;">{{ request.user.get_full_name|default:request.user.username }}</div>
+                    <div style="font-size: 11px; color: var(--text-muted);">@{{ request.user.username }}</div>
+                </div>
+            </div>
+            <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700;">Interests</div>
+            {% if request.user.profile.interests %}
+            <div class="tags">
+                {% for interest in request.user.profile.interests.split %}
+                <span class="tag" style="border-color: rgba(108,99,255,0.3); color: var(--accent);">#{{ interest|cut:"," }}</span>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p style="font-size: 13px; color: var(--text-muted);">No interests set. <a href="/settings/profile/" style="color: var(--accent);">Add some</a> to improve your recommendations.</p>
+            {% endif %}
+            <a href="/settings/profile/" class="btn btn-secondary btn-sm" style="margin-top: 14px; width: 100%; justify-content: center;">Update Interests</a>
+        </div>
+
+        <div class="panel-card">
+            <div class="panel-title">Recommendation Stats</div>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 13px; color: var(--text-dim);">Posts analyzed</span>
+                    <span style="font-weight: 700; font-family: 'DM Mono';">{{ recommended_posts|length }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 13px; color: var(--text-dim);">AI model</span>
+                    <span style="font-size: 12px; font-family: 'DM Mono'; color: var(--accent);">Claude</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 13px; color: var(--text-dim);">Updated</span>
+                    <span style="font-size: 12px; font-family: 'DM Mono'; color: var(--text-muted);">Real-time</span>
+                </div>
+            </div>
+        </div>
+    </aside>
+</div>
+{% endblock %}

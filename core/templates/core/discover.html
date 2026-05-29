@@ -1,0 +1,231 @@
+{% extends 'core/base.html' %}
+{% block title %}Discover{% endblock %}
+
+{% block extra_css %}
+<style>
+    .category-filters {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+    }
+
+    .category-filter {
+        padding: 7px 16px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 500;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text-2);
+        text-decoration: none;
+        transition: all 0.15s;
+        cursor: pointer;
+    }
+
+    .category-filter:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+    }
+
+    .category-filter.active {
+        background: var(--accent-glow);
+        border-color: var(--accent);
+        color: var(--accent);
+    }
+
+    .discover-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 18px;
+    }
+
+    @media (max-width: 700px) {
+        .discover-grid { grid-template-columns: 1fr; }
+    }
+
+    .discover-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        transition: all 0.2s;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .discover-card:hover {
+        border-color: var(--border-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+    }
+
+    .discover-card-img {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+        background: var(--surface-3);
+    }
+
+    .discover-card-body {
+        padding: 16px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .discover-card-meta {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 10px;
+    }
+
+    .discover-card-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 8px;
+        line-height: 1.3;
+        flex: 1;
+    }
+
+    .discover-card-excerpt {
+        font-size: 13px;
+        color: var(--text-2);
+        line-height: 1.6;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        margin-bottom: 14px;
+    }
+
+    .discover-card-footer {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding-top: 12px;
+        border-top: 1px solid var(--border);
+        margin-top: auto;
+    }
+
+    .discover-card-author {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex: 1;
+        text-decoration: none;
+    }
+
+    .discover-author-avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        object-fit: cover;
+        background: var(--surface-3);
+    }
+
+    .discover-author-name {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-2);
+    }
+
+    .discover-stats {
+        display: flex;
+        gap: 10px;
+        font-size: 12px;
+        color: var(--text-3);
+        font-family: 'DM Mono', monospace;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Discover</h1>
+    <p class="page-subtitle">Explore posts from the entire Nexus community</p>
+</div>
+
+<!-- Search -->
+<form method="GET" style="margin-bottom:20px">
+    <div class="search-bar">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="text" name="q" placeholder="Search posts, topics, people..." value="{{ search_query }}">
+        {% if selected_category %}<input type="hidden" name="category" value="{{ selected_category }}">{% endif %}
+    </div>
+</form>
+
+<!-- Category filters -->
+<div class="category-filters">
+    <a href="/discover/" class="category-filter {% if not selected_category %}active{% endif %}">All</a>
+    {% for cat in categories %}
+    <a href="/discover/?category={{ cat.slug }}{% if search_query %}&q={{ search_query }}{% endif %}"
+       class="category-filter {% if selected_category == cat.slug %}active{% endif %}">
+        {{ cat.name }}
+    </a>
+    {% endfor %}
+</div>
+
+<!-- Results count -->
+{% if search_query %}
+<p style="font-size:13px;color:var(--text-3);margin-bottom:18px">
+    {{ posts|length }} result{% if posts|length != 1 %}s{% endif %} for "{{ search_query }}"
+</p>
+{% endif %}
+
+<!-- Posts grid -->
+<div class="discover-grid">
+    {% for post in posts %}
+    <div class="discover-card">
+        {% if post.image_url %}
+        <a href="/post/{{ post.id }}/">
+            <img src="{{ post.image_url }}" alt="{{ post.image_alt }}" class="discover-card-img">
+        </a>
+        {% endif %}
+        <div class="discover-card-body">
+            <div class="discover-card-meta">
+                {% if post.category %}
+                <span class="post-category-badge">{{ post.category.name }}</span>
+                {% endif %}
+                <span style="font-size:11px;color:var(--text-3);font-family:'DM Mono',monospace;margin-left:auto">{{ post.created_at|timesince }} ago</span>
+            </div>
+            <a href="/post/{{ post.id }}/" style="text-decoration:none">
+                <div class="discover-card-title">{{ post.title|default:post.content|truncatechars:70 }}</div>
+            </a>
+            {% if post.title %}
+            <div class="discover-card-excerpt">{{ post.content|truncatechars:100 }}</div>
+            {% endif %}
+            <div class="discover-card-footer">
+                <a href="/profile/{{ post.author.username }}/" class="discover-card-author">
+                    <img src="{{ post.author.profile.get_avatar }}" alt="{{ post.author.username }}" class="discover-author-avatar">
+                    <span class="discover-author-name">{{ post.author.get_full_name|default:post.author.username }}</span>
+                </a>
+                <div class="discover-stats">
+                    <span>{{ post.like_count }} likes</span>
+                    <span>{{ post.comment_count }} comments</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div style="grid-column:1/-1;text-align:center;padding:60px 0">
+        <p style="color:var(--text-3);font-size:15px">No posts found{% if search_query %} for "{{ search_query }}"{% endif %}</p>
+        <a href="/discover/" class="btn btn-ghost" style="margin-top:12px">Clear filters</a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block right_sidebar %}
+<div class="widget">
+    <div class="widget-title">Browse Topics <span>Categories</span></div>
+    {% for cat in categories %}
+    <a href="/discover/?category={{ cat.slug }}" class="trend-item">
+        <span class="trend-name">{{ cat.name }}</span>
+    </a>
+    {% endfor %}
+</div>
+{% endblock %}

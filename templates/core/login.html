@@ -1,0 +1,60 @@
+{% extends 'core/base.html' %}
+{% block title %}Sign In{% endblock %}
+{% block content %}
+<div class="auth-page">
+    <div class="auth-visual">
+        <div class="auth-visual-bg"></div>
+        <div class="grid-bg"></div>
+        <div class="auth-visual-content">
+            <h1>Where ideas<br>find their<br>audience.</h1>
+            <p>Nexus connects you with content and people that matter — powered by genuine AI intelligence, not algorithms.</p>
+            <div style="margin-top: 40px; display: flex; justify-content: center; gap: 16px;">
+                <img src="https://picsum.photos/seed/social1/60/60" style="border-radius: 50%; border: 2px solid rgba(255,255,255,0.2);" alt="">
+                <img src="https://picsum.photos/seed/social2/60/60" style="border-radius: 50%; border: 2px solid rgba(255,255,255,0.2);" alt="">
+                <img src="https://picsum.photos/seed/social3/60/60" style="border-radius: 50%; border: 2px solid rgba(255,255,255,0.2);" alt="">
+                <img src="https://picsum.photos/seed/social4/60/60" style="border-radius: 50%; border: 2px solid rgba(255,255,255,0.2);" alt="">
+                <img src="https://picsum.photos/seed/social5/60/60" style="border-radius: 50%; border: 2px solid rgba(255,255,255,0.2);" alt="">
+            </div>
+            <p style="margin-top: 12px; font-size: 12px; color: rgba(255,255,255,0.3);">Join 50,000+ thoughtful people</p>
+        </div>
+    </div>
+    <div class="auth-form-panel">
+        <div class="auth-form">
+            <div class="auth-logo">
+                <div class="logo-mark">N</div>
+                <span class="logo-text">Nexus</span>
+            </div>
+            <div>
+                <h2 class="auth-title">Welcome back</h2>
+                <p class="auth-subtitle">Sign in to your account to continue</p>
+            </div>
+
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+            {% endif %}
+
+            <form method="post" style="display: flex; flex-direction: column; gap: 16px;">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label class="form-label">Username</label>
+                    <input class="form-input" type="text" name="username" placeholder="your_username" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input class="form-input" type="password" name="password" placeholder="••••••••" required autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 14px;">
+                    Sign In
+                </button>
+            </form>
+
+            <div class="auth-divider">or</div>
+            <p style="text-align: center; font-size: 14px; color: var(--text-dim);">
+                New to Nexus? <a href="/register/" class="auth-link">Create an account</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

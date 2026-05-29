@@ -1,0 +1,40 @@
+{% extends "core/base.html" %}
+{% block title %}Bookmarks{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h2>Saved Posts</h2>
+</div>
+{% for post in posts %}
+<article class="post-card">
+  <div class="post-meta">
+    <a href="{% url 'profile' post.author.username %}">
+      <img src="{{ post.author.get_avatar }}" alt="{{ post.author.username }}" class="avatar">
+    </a>
+    <div>
+      <a href="{% url 'profile' post.author.username %}" class="post-author-name">{{ post.author.get_full_name|default:post.author.username }}</a>
+      <div style="font-size:.72rem;color:var(--ink-4)">@{{ post.author.username }}</div>
+    </div>
+    <span class="category-pill">{{ post.get_category_display }}</span>
+  </div>
+  <div class="post-content">{{ post.content }}</div>
+  {% if post.get_image %}
+  <a href="{% url 'post_detail' post.pk %}">
+    <img src="{{ post.get_image }}" alt="" class="post-image" loading="lazy">
+  </a>
+  {% endif %}
+  <div class="post-actions">
+    <button class="action-btn like-btn {% if user in post.likes.all %}liked{% endif %}" data-pk="{{ post.pk }}">
+      <svg width="16" height="16" fill="{% if user in post.likes.all %}currentColor{% else %}none{% endif %}" stroke="currentColor" viewBox="0 0 24 24" class="like-icon"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+      <span class="like-count">{{ post.like_count }}</span>
+    </button>
+    <button class="action-btn bookmark-btn bookmarked" data-pk="{{ post.pk }}">
+      <svg fill="currentColor" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+      Saved
+    </button>
+    <a href="{% url 'post_detail' post.pk %}" class="action-btn">View</a>
+  </div>
+</article>
+{% empty %}
+<div style="padding:60px;text-align:center;color:var(--ink-4)">No bookmarks yet. Save posts to find them here.</div>
+{% endfor %}
+{% endblock %}

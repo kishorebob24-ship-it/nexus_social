@@ -1,0 +1,121 @@
+{% extends "core/base.html" %}
+{% block title %}Home Feed{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h2>Home Feed</h2>
+  <p style="font-size:.75rem;color:var(--ink-4);margin-top:3px;">AI-curated for your interests</p>
+</div>
+
+<!-- Quick compose -->
+<div class="compose-box">
+  <div class="compose-inner">
+    <img src="{{ user.get_avatar }}" alt="{{ user.username }}" class="avatar">
+    <div style="flex:1">
+      <a href="{% url 'create_post' %}" style="display:block">
+        <div style="padding:10px 0;color:var(--ink-4);font-size:.93rem;cursor:text;border-bottom:1px solid var(--border)">
+          What's on your mind, {{ user.first_name|default:user.username }}?
+        </div>
+      </a>
+      <div style="display:flex;gap:12px;margin-top:10px">
+        <a href="{% url 'create_post' %}" class="btn btn-ghost" style="font-size:.75rem;padding:5px 12px">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          Photo
+        </a>
+        <a href="{% url 'create_post' %}" class="btn btn-ghost" style="font-size:.75rem;padding:5px 12px">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-5 5a2 2 0 01-2.828 0l-7-7A2 2 0 013 9.414V5a2 2 0 012-2z"/></svg>
+          Tag
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Posts -->
+{% if posts %}
+  {% for post in posts %}
+  <article class="post-card">
+    <div class="post-meta">
+      <a href="{% url 'profile' post.author.username %}">
+        <img src="{{ post.author.get_avatar }}" alt="{{ post.author.username }}" class="avatar">
+      </a>
+      <div>
+        <a href="{% url 'profile' post.author.username %}" class="post-author-name">
+          {{ post.author.get_full_name|default:post.author.username }}
+        </a>
+        <div style="font-size:.72rem;color:var(--ink-4);">@{{ post.author.username }}</div>
+      </div>
+      <span class="category-pill">{{ post.get_category_display }}</span>
+      <span class="post-time">{{ post.created_at|timesince }} ago</span>
+    </div>
+
+    <div class="post-content">{{ post.content }}</div>
+
+    {% if post.get_image %}
+    <a href="{% url 'post_detail' post.pk %}">
+      <img src="{{ post.get_image }}" alt="Post image" class="post-image" loading="lazy">
+    </a>
+    {% endif %}
+
+    {% if post.get_tags_list %}
+    <div class="post-tags">
+      {% for tag in post.get_tags_list %}
+      <a href="{% url 'explore' %}?q={{ tag }}" class="tag">#{{ tag }}</a>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="post-actions">
+      <button class="action-btn like-btn {% if user in post.likes.all %}liked{% endif %}" data-pk="{{ post.pk }}">
+        <svg width="16" height="16" fill="{% if user in post.likes.all %}currentColor{% else %}none{% endif %}" stroke="currentColor" viewBox="0 0 24 24" class="like-icon"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+        <span class="like-count">{{ post.like_count }}</span>
+      </button>
+      <a href="{% url 'post_detail' post.pk %}" class="action-btn">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+        {{ post.comment_count }}
+      </a>
+      <button class="action-btn bookmark-btn {% if user in post.bookmarks.all %}bookmarked{% endif %}" data-pk="{{ post.pk }}">
+        <svg fill="{% if user in post.bookmarks.all %}currentColor{% else %}none{% endif %}" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+        Save
+      </button>
+      <a href="{% url 'post_detail' post.pk %}" class="action-btn" style="margin-left:auto">View</a>
+    </div>
+  </article>
+  {% endfor %}
+{% else %}
+  <div style="padding:60px 28px;text-align:center;color:var(--ink-4)">
+    <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin:0 auto 16px;opacity:.3"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
+    <p style="font-size:.9rem">No posts yet. Follow people or <a href="{% url 'create_post' %}" style="color:var(--accent)">create a post</a>.</p>
+  </div>
+{% endif %}
+{% endblock %}
+
+{% block right_panel %}
+<div class="widget">
+  <div class="widget-title">
+    <span class="ai-badge">AI</span> Suggested People
+  </div>
+  {% for su in suggested_users %}
+  <div class="suggest-user">
+    <a href="{% url 'profile' su.username %}">
+      <img src="{{ su.get_avatar }}" alt="{{ su.username }}">
+    </a>
+    <div class="suggest-info">
+      <a href="{% url 'profile' su.username %}" class="name">{{ su.get_full_name|default:su.username }}</a>
+      <div class="handle">@{{ su.username }} · {{ su.follower_count }} followers</div>
+    </div>
+    <button class="follow-btn" data-username="{{ su.username }}">Follow</button>
+  </div>
+  {% empty %}
+  <p style="font-size:.8rem;color:var(--ink-4)">No suggestions yet.</p>
+  {% endfor %}
+</div>
+
+<div class="widget">
+  <div class="widget-title">Quick Links</div>
+  <a href="{% url 'explore' %}" style="display:block;font-size:.83rem;padding:6px 0;border-top:1px solid var(--border);color:var(--ink-3)">Explore trending posts</a>
+  <a href="{% url 'create_post' %}" style="display:block;font-size:.83rem;padding:6px 0;border-top:1px solid var(--border);color:var(--ink-3)">Create a new post</a>
+  <a href="{% url 'edit_profile' %}" style="display:block;font-size:.83rem;padding:6px 0;border-top:1px solid var(--border);color:var(--ink-3)">Edit your profile</a>
+  <a href="{% url 'logout' %}" style="display:block;font-size:.83rem;padding:6px 0;border-top:1px solid var(--border);color:var(--accent)">Sign out</a>
+</div>
+{% endblock %}

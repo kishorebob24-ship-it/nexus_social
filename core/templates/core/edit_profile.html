@@ -1,0 +1,24 @@
+{% extends "core/base.html" %}
+{% block title %}Edit Profile{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h2>Edit Profile</h2>
+</div>
+<div style="padding:24px 28px;max-width:560px">
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% for field in form %}
+    <div class="form-group">
+      <label>{{ field.label }}</label>
+      {{ field }}
+      {% if field.help_text %}<p class="help-text">{{ field.help_text }}</p>{% endif %}
+      {% for error in field.errors %}<p class="form-error">{{ error }}</p>{% endfor %}
+    </div>
+    {% endfor %}
+    <div style="display:flex;gap:12px;margin-top:4px">
+      <button type="submit" class="btn btn-primary">Save Changes</button>
+      <a href="{% url 'profile' user.username %}" class="btn btn-ghost">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

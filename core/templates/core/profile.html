@@ -1,0 +1,88 @@
+{% extends "core/base.html" %}
+{% block title %}{{ profile_user.username }}{% endblock %}
+
+{% block content %}
+<div class="profile-cover">
+  {% if profile_user.cover_url %}
+  <img src="{{ profile_user.cover_url }}" alt="Cover">
+  {% else %}
+  <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=900&auto=format&fit=crop" alt="Cover">
+  {% endif %}
+</div>
+
+<div class="profile-info-bar">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end">
+    <div class="profile-avatar-wrap">
+      <img src="{{ profile_user.get_avatar }}" alt="{{ profile_user.username }}">
+    </div>
+    <div style="padding-bottom:8px">
+      {% if is_own %}
+      <a href="{% url 'edit_profile' %}" class="btn btn-ghost">Edit Profile</a>
+      {% else %}
+      <button class="follow-btn {% if is_following %}following{% endif %}" data-username="{{ profile_user.username }}" style="padding:7px 18px">
+        {% if is_following %}Following{% else %}Follow{% endif %}
+      </button>
+      {% endif %}
+    </div>
+  </div>
+  <div class="profile-name">{{ profile_user.get_full_name|default:profile_user.username }}</div>
+  <div class="profile-handle">@{{ profile_user.username }}</div>
+  {% if profile_user.bio %}<p class="profile-bio">{{ profile_user.bio }}</p>{% endif %}
+  {% if profile_user.location %}
+  <p style="font-size:.78rem;color:var(--ink-4);margin-bottom:8px">
+    <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display:inline;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+    {{ profile_user.location }}
+  </p>
+  {% endif %}
+  <div class="profile-stats">
+    <div class="profile-stat"><strong>{{ posts.count }}</strong> <span>Posts</span></div>
+    <div class="profile-stat"><strong>{{ profile_user.follower_count }}</strong> <span>Followers</span></div>
+    <div class="profile-stat"><strong>{{ profile_user.following_count }}</strong> <span>Following</span></div>
+  </div>
+</div>
+
+<div style="padding:20px 28px 8px;border-bottom:1px solid var(--border)">
+  <h3 style="font-family:var(--font-serif);font-size:1rem;color:var(--ink-3)">Posts</h3>
+</div>
+
+{% for post in posts %}
+<article class="post-card">
+  <div class="post-meta">
+    <img src="{{ profile_user.get_avatar }}" alt="{{ profile_user.username }}" class="avatar">
+    <div>
+      <div class="post-author-name">{{ profile_user.get_full_name|default:profile_user.username }}</div>
+      <div style="font-size:.72rem;color:var(--ink-4)">{{ post.created_at|timesince }} ago</div>
+    </div>
+    <span class="category-pill">{{ post.get_category_display }}</span>
+  </div>
+  <div class="post-content">{{ post.content }}</div>
+  {% if post.get_image %}
+  <a href="{% url 'post_detail' post.pk %}">
+    <img src="{{ post.get_image }}" alt="" class="post-image" loading="lazy">
+  </a>
+  {% endif %}
+  <div class="post-actions">
+    <button class="action-btn like-btn {% if user in post.likes.all %}liked{% endif %}" data-pk="{{ post.pk }}">
+      <svg width="16" height="16" fill="{% if user in post.likes.all %}currentColor{% else %}none{% endif %}" stroke="currentColor" viewBox="0 0 24 24" class="like-icon"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+      <span class="like-count">{{ post.like_count }}</span>
+    </button>
+    <a href="{% url 'post_detail' post.pk %}" class="action-btn">View</a>
+  </div>
+</article>
+{% empty %}
+<div style="padding:40px;text-align:center;color:var(--ink-4);font-size:.88rem">No posts yet.</div>
+{% endfor %}
+{% endblock %}
+
+{% block right_panel %}
+{% if profile_user.interests %}
+<div class="widget">
+  <div class="widget-title">Interests</div>
+  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px">
+    {% for i in profile_user.interests.split(',') %}
+    <span style="font-size:.75rem;padding:3px 8px;background:var(--paper-3);border-radius:2px;color:var(--ink-2)">#{{ i|lower|trim }}</span>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+{% endblock %}

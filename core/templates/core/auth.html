@@ -1,0 +1,48 @@
+{% extends "core/base.html" %}
+{% block auth_content %}
+<div class="auth-page">
+  <div class="auth-panel">
+    <div class="auth-brand">Ne<span>x</span>us</div>
+    <p class="auth-tagline">Your intelligent social network</p>
+
+    {% if mode == 'login' %}
+    <form method="post" action="{% url 'login' %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}">
+      {% csrf_token %}
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" name="username" autofocus required>
+        {% if form.errors %}<p class="form-error">Invalid credentials.</p>{% endif %}
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" name="password" required>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:11px">Sign In</button>
+    </form>
+    <p class="auth-switch">New to Nexus? <a href="{% url 'register' %}">Create account</a></p>
+    {% else %}
+    <form method="post" action="{% url 'register' %}">
+      {% csrf_token %}
+      {% for field in form %}
+      <div class="form-group">
+        <label>{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text %}<p class="help-text">{{ field.help_text }}</p>{% endif %}
+        {% for error in field.errors %}<p class="form-error">{{ error }}</p>{% endfor %}
+      </div>
+      {% endfor %}
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:11px">Create Account</button>
+    </form>
+    <p class="auth-switch">Already have an account? <a href="{% url 'login' %}">Sign in</a></p>
+    {% endif %}
+  </div>
+
+  <div class="auth-visual">
+    <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&auto=format&fit=crop" alt="Community">
+    <div class="auth-visual-text">
+      <h2>Where ideas connect with intelligence</h2>
+      <p>Nexus uses AI to surface the content and people most relevant to you — automatically learning from your interests.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
